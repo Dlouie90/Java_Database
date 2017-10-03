@@ -1,7 +1,14 @@
-package database_connector;
+package connection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import java.util.Scanner;
+
+import com.mysql.jdbc.ResultSetMetaData;
+import com.mysql.jdbc.Statement;
 
 public class Java_Database {
 	private static Connection connection = null;
@@ -22,15 +29,56 @@ public class Java_Database {
 			 * 
 			 * @param password: password for specific user, root has no password
 			 */
-			String url = "jdbc:mysql://localhost:3306/company";
+			String url = "jdbc:mysql://localhost:3306/login";
 			String username = "root";
-			String password = "";
+			String password = "1234";
 
 			System.out.println("Connecting database...");
 			connection = DriverManager.getConnection(url, username, password);
 			System.out.println("Database connected!");
-			statement = connection.createStatement();
-
+			statement = (Statement) connection.createStatement();
+			
+			// Drop Table If Exists
+			String sql= "DROP TABLE IF EXISTS Member;";
+			statement.executeUpdate(sql);
+			
+			// Create Table Member
+			sql = "CREATE TABLE Member "
+					+ "(id INT NOT NULL PRIMARY KEY UNIQUE AUTO_INCREMENT," 
+					+ " email varchar(30) UNIQUE NOT NULL,"
+					+ " password varchar(30) NOT NULL," 
+					+ " description varchar(30) NULL);";
+			statement.executeUpdate(sql);
+			
+			// Insert dummy values into Member table
+			sql = "INSERT INTO Member VALUES "
+					+ "(31, 'batman@gmail.com', '1234', 'Hello World!'),"
+					+ "(32, 'kane@yahoo.com', '1234', 'Goodbye World!'),"
+					+ "(33, 'bobbyhill@gmail.com', '1234', 'Good night!');";
+			statement.executeUpdate(sql);
+			
+			// Get the whole table of Member
+			sql = "SELECT * FROM Member;";
+			resultSet = statement.executeQuery(sql);
+			
+			while(resultSet.next()){
+				int id = resultSet.getInt("id");
+				String email = resultSet.getString("email");
+				String pass = resultSet.getString("password");
+				String desc = resultSet.getString("description");
+			}
+			
+			// Get Member by email
+			sql = "SELECT * FROM Member WHERE email = 'batman@gmail.com'";
+			resultSet = statement.executeQuery(sql);
+			
+			while(resultSet.next()){
+				int id = resultSet.getInt("id");
+				String email = resultSet.getString("email");
+				String pass = resultSet.getString("password");
+				String desc = resultSet.getString("description");
+			}
+			
 			// Main loop
 			boolean done = false;
 			do {
@@ -41,8 +89,7 @@ public class Java_Database {
 
 				if (userInput.equalsIgnoreCase("exit")) {
 					done = true;
-				}
-				else{
+				} else {
 					try {
 						resultSet = statement.executeQuery(command);
 						printResults(resultSet);
@@ -69,10 +116,10 @@ public class Java_Database {
 
 	private static void printResults(ResultSet resultSet) throws SQLException {
 		// ResultSet is initially before the first data sets
-		ResultSetMetaData metaData = resultSet.getMetaData();
+		ResultSetMetaData metaData = (ResultSetMetaData) resultSet.getMetaData();
 		int columns = metaData.getColumnCount();
 		String row = "";
-		for(int i = 1; i <= columns; i++){
+		for (int i = 1; i <= columns; i++) {
 			row += metaData.getColumnLabel(i) + "\t";
 		}
 		System.out.print(row + "\n");
@@ -82,8 +129,8 @@ public class Java_Database {
 			// also possible to get the columns via the column number
 			// which starts at 1
 			// e.g. resultSet.getSTring(2);
-			for (int i=1; i <= columns; i++){
-			    row += resultSet.getString(i) + "\t";
+			for (int i = 1; i <= columns; i++) {
+				row += resultSet.getString(i) + "\t";
 			}
 			System.out.print(row + "\n");
 			row = "";
@@ -105,7 +152,7 @@ public class Java_Database {
 		String userInput = ""; // local scope of userInput although I can't
 								// remember why
 		boolean valid = false; // used to make sure user input is
-									// acceptable
+								// acceptable
 
 		userInput = keyboard.nextLine();
 
