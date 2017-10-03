@@ -24,7 +24,7 @@ public class Java_Database {
 			 */
 			String url = "jdbc:mysql://localhost:3306/company";
 			String username = "root";
-			String password = "Silk12duck";
+			String password = "";
 
 			System.out.println("Connecting database...");
 			connection = DriverManager.getConnection(url, username, password);
